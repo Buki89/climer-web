@@ -5,8 +5,6 @@ import styled from "styled-components";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import { useUserContext } from "../context/user-context";
-import NextLink from "next/link";
-import { useAuth } from "../hooks/useAuth";
 
 const Container = styled("div")`
   display: flex;
@@ -21,18 +19,17 @@ const Form = styled("form")`
   flex-direction: column;
 `;
 
-const Home: NextPage = () => {
+const SignUp: NextPage = () => {
   const router = useRouter();
   const { setUser } = useUserContext();
-  useAuth();
 
   return (
     <Container>
       <Formik
         initialValues={{ username: "", password: "" }}
-        onSubmit={async (values, action) => {
+        onSubmit={(values, action) => {
           try {
-            await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`, {
+            fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/signup`, {
               method: "POST",
               credentials: "include",
               headers: {
@@ -40,15 +37,19 @@ const Home: NextPage = () => {
               },
               body: JSON.stringify({ ...values }),
             }).then((res) => {
-              if (res.status > 200) {
-                action.setSubmitting(false);
-              } else {
+              console.log("res", res);
+              if (res.status > 400) {
+                console.log("BAD");
+              }
+              if (res.status === 200) {
                 setUser({ username: values.username });
                 router.push("/lobby");
               }
+
+              console.log("GOOD");
             });
-          } catch (error) {
-            console.log("error", error);
+          } catch (err) {
+            console.log("err", err);
           }
         }}
       >
@@ -60,49 +61,36 @@ const Home: NextPage = () => {
           handleBlur,
           handleSubmit,
           isSubmitting,
+          /* and other goodies */
         }) => (
           <Form onSubmit={handleSubmit}>
-            <h2>Login</h2>
+            <h2>Register</h2>
             <TextInput
-              type="username"
+              type="text"
               name="username"
-              label="username"
+              label="Username"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
             />
             {errors.username && touched.username && errors.username}
             <TextInput
-              label="password"
               type="password"
               name="password"
+              label="Password"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.password}
             />
             {errors.password && touched.password && errors.password}
-            <Button type="submit" disabled={isSubmitting} title="Login" />
-            <NextLink href="/signup" passHref={true}>
-              <a>Register</a>
-            </NextLink>
+            <Button type="submit" disabled={isSubmitting}>
+              Submit
+            </Button>
           </Form>
         )}
       </Formik>
     </Container>
-    // <Container>
-    //   <Form onSubmit={handleSubmit}>
-    //     <TextInput
-    //       name="username"
-    //       value={username}
-    //       onChange={handleChange}
-    //       label="Username"
-    //     />
-    //     <Button type="submit" disabled={username.length === 0}>
-    //       Login
-    //     </Button>
-    //   </Form>
-    // </Container>
   );
 };
 
-export default Home;
+export default SignUp;
