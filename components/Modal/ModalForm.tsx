@@ -5,12 +5,14 @@ import Box from "../Box";
 import Button from "../Button";
 import TextInput from "../TextInput";
 import { v4 as uuidv4 } from "uuid";
+import { useUserContext } from "../../context/user-context";
 
 type ModalFormProps = {
   createRoom: (room: Room) => void;
 };
 
 const ModalForm: FC<ModalFormProps> = ({ createRoom }) => {
+  const { user } = useUserContext();
   return (
     <Formik
       initialValues={{
@@ -22,6 +24,7 @@ const ModalForm: FC<ModalFormProps> = ({ createRoom }) => {
       onSubmit={(values, action) => {
         createRoom({
           ...values,
+          admin: user?.username || "",
           id: uuidv4(),
           playerCount: 0,
         });
