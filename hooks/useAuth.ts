@@ -8,7 +8,8 @@ export const useAuth = () => {
   const { setUser } = useUserContext();
 
   useEffect(() => {
-    console.log("useAuth", process.env.NEXT_PUBLIC_SERVER_URL);
+    console.log("useAuth - server", process.env.NEXT_PUBLIC_SERVER_URL);
+    console.log("useAuth - env", process.env.VERCEL_ENV);
     const fetchData = async () => {
       try {
         const response = await fetch(
