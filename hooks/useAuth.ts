@@ -8,8 +8,6 @@ export const useAuth = () => {
   const { setUser } = useUserContext();
 
   useEffect(() => {
-    console.log("useAuth - server", process.env.NEXT_PUBLIC_SERVER_URL);
-    console.log("useAuth - env", process.env.VERCEL_ENV);
     const fetchData = async () => {
       try {
         const response = await fetch(
@@ -20,7 +18,6 @@ export const useAuth = () => {
         );
 
         if (response.status === 200) {
-          // setUser(response.body)
           const username = await response.json().then((data) => data.username);
           setUser({ username });
           socket.connect();
@@ -35,5 +32,5 @@ export const useAuth = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [router, setUser]);
 };

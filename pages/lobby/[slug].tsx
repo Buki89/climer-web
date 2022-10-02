@@ -96,6 +96,7 @@ const Slug: NextPage = () => {
 
   useEffect(() => {
     socket.on("get_players_in_same_room", (playerList: UserPayload[]) => {
+      console.log("get_players_in_same_room");
       const newArr = playerList.map((player) => {
         if (player.ready === undefined) {
           return {
@@ -111,10 +112,13 @@ const Slug: NextPage = () => {
     });
 
     socket.on("updated_user_info", (user: UserPayload) => {
+      console.log("updated_user_info", user);
       const transformedUser = {
         ...user,
         ready: user.ready === "1" ? true : false,
       } as User;
+      console.log("transformedUser", transformedUser);
+      console.log("playerList", playerList);
       const newArr = playerList.map((player) => {
         if (player.userid === transformedUser.userid) {
           return transformedUser;
@@ -133,6 +137,7 @@ const Slug: NextPage = () => {
 
   const handleReadyStatus = useCallback(() => {
     if (user?.username) {
+      console.log("user?.username", user?.username);
       socket.emit("change_ready_status", user.username);
     }
   }, [user?.username]);
@@ -140,7 +145,7 @@ const Slug: NextPage = () => {
   const handleLeaveRoom = useCallback(() => {
     socket.emit("leave_room", slug);
     router.push("/lobby");
-  }, [slug]);
+  }, [slug, router]);
 
   const handleStartGame = useCallback(() => {}, []);
 
