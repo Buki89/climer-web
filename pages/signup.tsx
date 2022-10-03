@@ -21,7 +21,7 @@ const Form = styled("form")`
 
 const SignUp: NextPage = () => {
   const router = useRouter();
-  const { setUser } = useUserContext();
+  const { setUsername } = useUserContext();
 
   return (
     <Container>
@@ -42,7 +42,7 @@ const SignUp: NextPage = () => {
                 console.log("BAD");
               }
               if (res.status === 200) {
-                setUser({ username: values.username });
+                setUsername(values.username);
                 router.push("/lobby");
               }
 
@@ -61,7 +61,6 @@ const SignUp: NextPage = () => {
           handleBlur,
           handleSubmit,
           isSubmitting,
-          /* and other goodies */
         }) => (
           <Form onSubmit={handleSubmit}>
             <h2>Register</h2>
@@ -83,9 +82,7 @@ const SignUp: NextPage = () => {
               value={values.password}
             />
             {errors.password && touched.password && errors.password}
-            <Button type="submit" disabled={isSubmitting}>
-              Submit
-            </Button>
+            <Button type="submit" disabled={isSubmitting} title="register" />
           </Form>
         )}
       </Formik>

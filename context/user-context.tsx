@@ -1,24 +1,24 @@
 import React, { FC, ReactNode, useContext, useState } from "react";
 
-type User = {
+// type User = {
+//   username: string;
+// };
+
+type State = {
   username: string;
 };
 
-type State = {
-  user: User | null;
-};
-
 const defaultValues: State = {
-  user: null,
+  username: null,
 };
 
 type UserContextState = State & {
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const UserContext = React.createContext<UserContextState>({
   ...defaultValues,
-  setUser: () => {},
+  setUsername: () => {},
 });
 
 const useUserContext = (): UserContextState =>
@@ -29,11 +29,11 @@ type SocketProviderProps = {
 };
 
 const UserProvider: FC<SocketProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string>("");
 
   const value = {
-    user,
-    setUser,
+    username,
+    setUsername,
   } as UserContextState;
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

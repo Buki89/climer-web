@@ -37,16 +37,27 @@ type ConnectedPlayersProps = {};
 
 const ConnectedPlayers: FC<ConnectedPlayersProps> = () => {
   const [players, setPlayers] = useState<User[]>([]);
-  const { user } = useUserContext();
+  const { username } = useUserContext();
 
   useEffect(() => {
-    socket.emit("get_players");
-    socket.on("get_players", (players: User[]) => {
+    socket.emit("players_in_room", "lobby");
+    socket.on("players_in_room", (players: User[]) => {
       setPlayers(players);
     });
 
     return () => {
-      socket.off("get_players");
+      socket.off("players_in_room");
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("refresh", () => {
+      console.log("refresh");
+      socket.emit("players_in_room", "lobby");
+    });
+
+    return () => {
+      socket.off("refresh");
     };
   }, []);
 
@@ -58,7 +69,7 @@ const ConnectedPlayers: FC<ConnectedPlayersProps> = () => {
       ) : (
         <List>
           {players.map((player) => {
-            if (player.username === user.username) {
+            if (player.username === username) {
               return (
                 <Item key={player.userid}>{`${player.username}(me)`}</Item>
               );

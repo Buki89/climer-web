@@ -1,9 +1,8 @@
-import React, { FC, useCallback, useEffect } from "react";
-import NextLink from "next/link";
-import Box from "./Box";
-import { useUserContext } from "../context/user-context";
+import Router from "next/router";
+import { FC, useCallback } from "react";
 import styled from "styled-components";
-import Router, { useRouter } from "next/router";
+import { useUserContext } from "../context/user-context";
+import Box from "./Box";
 import Button from "./Button";
 
 const Title = styled("h1")`
@@ -19,17 +18,13 @@ const Username = styled("h3")`
 type NavBarProps = {};
 
 const NavBar: FC<NavBarProps> = () => {
-  const { user } = useUserContext();
-  const { back } = useRouter();
+  const { username: user } = useUserContext();
 
   const logout = useCallback(async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
-        // headers: {
-        //   "Content-type": "application/json",
-        // },
       }).then((res) => {
         if (res.status > 200) {
           console.log("NOT OK");
@@ -52,11 +47,7 @@ const NavBar: FC<NavBarProps> = () => {
       flexDirection="row"
       padding="0 1rem 0 0"
     >
-      {/* <NextLink href={"/"} passHref={true}>
-        <Title>Climber</Title>
-      </NextLink> */}
       <Username>{user?.username}</Username>
-      <Button onClick={back} title="Go back" variant="action" />
       <Button onClick={logout} title="Logout" variant="secondary" />
     </Box>
   );

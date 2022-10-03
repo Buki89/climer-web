@@ -5,7 +5,7 @@ import socket from "../socket";
 
 export const useAuth = () => {
   const router = useRouter();
-  const { setUser } = useUserContext();
+  const { setUsername } = useUserContext();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,7 +19,7 @@ export const useAuth = () => {
 
         if (response.status === 200) {
           const username = await response.json().then((data) => data.username);
-          setUser({ username });
+          setUsername(username);
           socket.connect();
           router.route === "/" && router.push("/lobby");
         }

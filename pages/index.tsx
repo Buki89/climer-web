@@ -23,7 +23,7 @@ const Form = styled("form")`
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const { setUser } = useUserContext();
+  const { setUsername } = useUserContext();
   useAuth();
 
   return (
@@ -43,7 +43,7 @@ const Home: NextPage = () => {
               if (res.status > 200) {
                 action.setSubmitting(false);
               } else {
-                setUser({ username: values.username });
+                setUsername(values.username);
                 router.push("/lobby");
               }
             });
@@ -89,19 +89,6 @@ const Home: NextPage = () => {
         )}
       </Formik>
     </Container>
-    // <Container>
-    //   <Form onSubmit={handleSubmit}>
-    //     <TextInput
-    //       name="username"
-    //       value={username}
-    //       onChange={handleChange}
-    //       label="Username"
-    //     />
-    //     <Button type="submit" disabled={username.length === 0}>
-    //       Login
-    //     </Button>
-    //   </Form>
-    // </Container>
   );
 };
 

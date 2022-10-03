@@ -8,19 +8,7 @@ import NavBar from "../../components/NavBar";
 import { useUserContext } from "../../context/user-context";
 import { useAuth } from "../../hooks/useAuth";
 import socket from "../../socket";
-import { Room } from "../../types";
-
-type User = {
-  userid: string;
-  connected: string;
-  username: string;
-  room?: string;
-  ready: boolean;
-};
-
-type UserPayload = {
-  ready: "1" | "0" | undefined;
-} & Omit<User, "ready">;
+import { Room, User, UserPayload } from "../../types";
 
 const Badge = styled("div")<{ ready: boolean }>`
   height: 15px;
@@ -55,48 +43,47 @@ const Title = styled("p")`
 
 const Slug: NextPage = () => {
   const router = useRouter();
-  const { user } = useUserContext();
+  const { username } = useUserContext();
   const [playerList, SetPlayerList] = useState<User[]>([]);
   const [roomInfo, setRoomInfo] = useState<Room | null>(null);
-  const slug = router.query.slug;
+  const slug = router.query.slug as string;
   useAuth();
 
   useEffect(() => {
-    socket.on("a_new_user_has_joined_the_room", () => {
-      console.log("new member has joined the room");
-    });
-
-    return () => {
-      socket.off("a_new_user_has_joined_the_room");
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log("join room", user?.username);
-    if (slug && user && user.username) {
-      socket.emit("join_room", slug, user.username);
+    console.log("join room", username);
+    if (slug && username) {
+      socket.emit("join_room", slug);
     }
-  }, [slug, user?.username]);
+  }, [slug, username]);
 
   useEffect(() => {
-    socket.emit("get_players_in_same_room", slug);
+    socket.emit("players_in_room", slug);
   }, [slug]);
 
   useEffect(() => {
-    socket.emit("get_room_info", slug);
+    socket.on("refresh", () => {
+      socket.emit("players_in_room", slug);
+    });
+    return () => {
+      socket.off("refresh");
+    };
+  }, [slug]);
 
-    socket.on("get_room_info", (room: Room) => {
+  useEffect(() => {
+    socket.emit("room_info", slug);
+
+    socket.on("room_info", (room: Room) => {
       setRoomInfo(room);
     });
 
     return () => {
-      socket.off("get_room_info");
+      socket.off("room_info");
     };
   }, [slug]);
 
   useEffect(() => {
-    socket.on("get_players_in_same_room", (playerList: UserPayload[]) => {
-      console.log("get_players_in_same_room");
+    socket.on("players_in_room", (playerList: UserPayload[]) => {
+      console.log("players_in_room");
       const newArr = playerList.map((player) => {
         if (player.ready === undefined) {
           return {
@@ -130,26 +117,39 @@ const Slug: NextPage = () => {
     });
 
     return () => {
-      socket.off("get_players_in_same_room");
+      socket.off("players_in_room");
       socket.off("updated_user_info");
     };
-  }, [user, playerList]);
+  }, [username, playerList]);
+
+  useEffect(() => {
+    socket.on("leave_room", (done: boolean) => {
+      console.log("done", done);
+      if (done) {
+        router.push("/lobby");
+      }
+    });
+
+    return () => {
+      socket.off("leave_room");
+    };
+  }, [router]);
 
   const handleReadyStatus = useCallback(() => {
-    if (user?.username) {
-      console.log("user?.username", user?.username);
-      socket.emit("change_ready_status", user.username);
+    if (username) {
+      console.log("user?.username", username);
+      socket.emit("change_ready_status", username);
     }
-  }, [user?.username]);
+  }, [username]);
 
   const handleLeaveRoom = useCallback(() => {
     socket.emit("leave_room", slug);
-    router.push("/lobby");
-  }, [slug, router]);
+  }, [slug]);
 
   const handleStartGame = useCallback(() => {}, []);
 
-  const isAdmin = user && roomInfo && user.username === roomInfo.admin;
+  const isAdmin =
+    username.length > 0 && roomInfo && username === roomInfo.admin;
 
   return (
     <>
@@ -160,7 +160,9 @@ const Slug: NextPage = () => {
           <ul>
             {playerList.map((player) => {
               const isRoomAdmin =
-                roomInfo && user && roomInfo.admin === player.username;
+                roomInfo &&
+                username.length > 0 &&
+                roomInfo.admin === player.username;
 
               return (
                 <li key={player.userid}>

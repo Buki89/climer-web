@@ -1,13 +1,13 @@
+import FlexLink from "next/link";
+import { useRouter } from "next/router";
 import { FC, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import useModal from "../hooks/useModal";
+import socket from "../socket";
 import { Room } from "../types";
 import Box from "./Box";
 import Button from "./Button";
 import { Modal } from "./Modal";
-import FlexLink from "next/link";
-import socket from "../socket";
-import { useRouter } from "next/router";
 
 const Link = styled("a")`
   display: flex;
@@ -51,6 +51,7 @@ const RoomList: FC<RoomListProps> = () => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("render");
     socket.emit("get_rooms");
 
     socket.on("get_rooms", (newRooms: Room[]) => {
@@ -63,16 +64,6 @@ const RoomList: FC<RoomListProps> = () => {
     };
   }, []);
 
-  useEffect(() => {
-    socket.on("refresh", () => {
-      socket.emit("get_rooms");
-    });
-
-    return () => {
-      socket.off("refresh");
-    };
-  }, []);
-
   const createRoom = useCallback(
     (room: Room) => {
       const newRoomsList = [...rooms];
@@ -82,7 +73,7 @@ const RoomList: FC<RoomListProps> = () => {
       socket.emit("add_room", room);
       router.push(`/lobby/${room.id}`);
     },
-    [rooms, isShowing]
+    [rooms, isShowing, router, toggle]
   );
 
   return (

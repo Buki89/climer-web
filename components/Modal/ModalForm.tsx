@@ -12,7 +12,7 @@ type ModalFormProps = {
 };
 
 const ModalForm: FC<ModalFormProps> = ({ createRoom }) => {
-  const { user } = useUserContext();
+  const { username: user } = useUserContext();
   return (
     <Formik
       initialValues={{
